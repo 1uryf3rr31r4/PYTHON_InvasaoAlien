@@ -1,5 +1,6 @@
 import pygame
 import random
+import sys
 
 pygame.init()
 
@@ -23,7 +24,7 @@ class Jogo:
         self.placar = 0
 
         self.velocidade_bala = 10
-        self.velocidade_inimigo = 2
+        self.velocidade_inimigos = 2
 
         self.fonte = pygame.font.SysFont(("Arial", 12))
 
@@ -57,7 +58,7 @@ class Jogo:
             pygame.draw.rect(tela, vermelho, bala)
 
         for inimigos in self.inimigos:
-            pygame.draw.rect(tela, amarelo, inimigo)
+            pygame.draw.rect(tela, amarelo, inimigos)
 
         self.desenhar_placar()
 
@@ -70,8 +71,33 @@ class Jogo:
             nova_bala = pygame.rect(self.nave.x + self.nave.width // 2 - 2, self.nave.y, 5, 20)
             self.balas.append(nova_bala)
 
+    def atualizar_balas(self):
+        for bala in self.balas[:]:
+            bala.y -= self.velocidade_bala
+            if bala.y < 0:
+                self.balas.remove(bala)
+
+    def atualizar_inimigos(self):
+        for inimigo in self.inimigos[:]:
+            inimigo.y += self.velocidade_inimigos
+            if inimigo.y > altura:
+                self.inimigos.remove(inimigo)
+
+    def checar_colisoes(self):
+        for bala in self.balas[:]:
+            for inimigo in self.inimigos[:]:
+                if bala.colliderect(inimigo):
+                    self.balas.remove(bala)
+                    self.inimigos.remove(inimigo)
+                    self.placar += 1
+                    break
+
+    def iniciar_jogo(self):
+        self.jogo_iniciado = True
+        self.criar_inimigos()
+
 def main():
-    clock = pygame.time.clock()
+    clock = pygame.time.Clock()
     jogo = Jogo()
 
     while True:
@@ -83,6 +109,28 @@ def main():
             if evento.type == pygame.MOUSEBUTTONDOWN:
                 if jogo.botao_iniciar.collidepoint(evento.pos) and not jogo.jogo_iniciado:
                     jogo.iniciar_jogo()
+
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_LEFT:
+                    jogo.mover_nave(-10)
+                if evento.key == pygame.K_RIGHT:
+                    jogo.mover_nave(10)
+                if evento.key == pygame.K_SPACE:
+                    jogo.atirar_bala()
+
+        if jogo.jogo_iniciado:
+            jogo.atualizar_balas()
+            jogo.atualizar_inimigos()
+            jogo.checar_colisoes()
+            jogo.desenhar()
+        else:
+            jogo.desenhar_botao_iniciar()
+
+        pygame.display.update()
+        clock.tick(60)
+
+if __name__ == '__main__':
+    main()
 
 
 """ from kivy.app import App
@@ -174,6 +222,4 @@ class InvasorApp(App):
         jogo = Jogo()
         return jogo
 
-if __name__ == '__main__':
-    InvasorApp().run()
 """
