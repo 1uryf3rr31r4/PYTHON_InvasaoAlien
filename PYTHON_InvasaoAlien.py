@@ -4,6 +4,86 @@ import random
 pygame.init()
 
 largura = 800
+altura = 600
+
+tela = pygame.display.set_mode((largura, altura))
+pygame.display.set_caption("Invasão Alien")
+
+verde = (0,255,0)
+vermelho = (255, 0, 0)
+amarelo = (255, 255, 0)
+preto = (0,0,0)
+branco = (255,255,255)
+
+class Jogo:
+    def __init__(self):
+        self.nave = pygame.rect(largura // 2 - 25, altura - 60, 50, 30)
+        self.balas = []
+        self.inimigos = []
+        self.placar = 0
+
+        self.velocidade_bala = 10
+        self.velocidade_inimigo = 2
+
+        self.fonte = pygame.font.SysFont(("Arial", 12))
+
+        self.criar_inimigos()
+
+        self.jogo_iniciado = False
+        self.botao_iniciar = pygame.rect(largura // 2 - 100, altura // 2 -25, 200, 50)
+
+    def criar_inimigos(self):
+        for i in range(5):
+            for j in range(5):
+                pos_x = 100 + (i * 60)
+                pos_y = 100 + (j * 50)
+                inimigo = pygame.rect(pos_x, pos_y, 50, 30)
+                self.inimigos.append(inimigo)
+
+    def desenhar_placar(self):
+        placar_texto = self.fonte.render(f'Placar: {self.placar}', True, branco)
+        tela.blit(placar_texto, (10,10))
+
+    def desenhar_botao_iniciar(self):
+        pygame.draw.rect(tela, branco, self.botao_iniciar)
+        texto_iniciar = self.font.render("Iniciar", True, preto)
+        tela.blit(texto_iniciar, (largura // 2 - 50, altura // 2 -20))
+
+    def desenhar(self):
+        tela.fill(preto)
+        pygame.draw.rect(tela, verde, self.nave)
+
+        for bala in self.balas:
+            pygame.draw.rect(tela, vermelho, bala)
+
+        for inimigos in self.inimigos:
+            pygame.draw.rect(tela, amarelo, inimigo)
+
+        self.desenhar_placar()
+
+    def mover_nave(self, mov_x):
+        if self.nave.x + mov_x >= 0 and self.nave.x + mov_x <= largura - self.nave.width:
+            self.nave.x += mov_x
+
+    def atirar_bala(self):
+        if len(self.balas) < 5:
+            nova_bala = pygame.rect(self.nave.x + self.nave.width // 2 - 2, self.nave.y, 5, 20)
+            self.balas.append(nova_bala)
+
+def main():
+    clock = pygame.time.clock()
+    jogo = Jogo()
+
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if evento.type == pygame.MOUSEBUTTONDOWN:
+                if jogo.botao_iniciar.collidepoint(evento.pos) and not jogo.jogo_iniciado:
+                    jogo.iniciar_jogo()
+
 
 """ from kivy.app import App
 from kivy.uix.widget import Widget
@@ -14,7 +94,6 @@ from kivy.graphics import Rectangle, Color
 from kivy.clock import Clock
 
 class Jogo(Widget):
-    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.botao_iniciar = Button(text="Iniciar", size_hint=(None, None), size=(200, 50), pos=(Window.width // 2 - 100, Window.height // 2))
@@ -41,13 +120,7 @@ class Jogo(Widget):
 
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
-    def criar_inimigos(self):
-        for i in range(5):
-            for j in range(5):
-                pos_x = 100 + (i * 60)
-                pos_y = 400 + (j * 50)
-                inimigo = Rectangle(size=(50, 30), pos=(pos_x, pos_y))
-                self.inimigos.append(inimigo)
+
 
     def mover_nave(self, instance, touch):
         if touch.x > self.nave.pos[0] and touch.x < self.nave.pos[0] + self.nave.size[0]:
@@ -57,7 +130,7 @@ class Jogo(Widget):
         if len(self.balas) < 5:
             pos_x = self.nave.pos[0] + self.nave.size[0] / 2
             bala = Rectangle(size=(5, 20), pos=(pos_x, self.nave.pos[1] + self.nave.size[1]))
-            self.balas.append(bala)
+
 
     def update(self, dt):
         for bala in self.balas[:]:
@@ -103,3 +176,4 @@ class InvasorApp(App):
 
 if __name__ == '__main__':
     InvasorApp().run()
+"""
