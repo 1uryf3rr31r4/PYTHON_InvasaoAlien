@@ -1,9 +1,14 @@
+import pygame
 import random
 
-from kivy.app import App
+pygame.init()
+
+largura = 800
+
+""" from kivy.app import App
 from kivy.uix.widget import Widget
-from kivy.uix.label import Label
 from kivy.uix.button import Button
+from kivy.uix.label import Label
 from kivy.core.window import Window
 from kivy.graphics import Rectangle, Color
 from kivy.clock import Clock
@@ -12,27 +17,36 @@ class Jogo(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.nave = Rectangle(size=(50,30), pos=(Window.width // 2 - 25, 50))
+        self.botao_iniciar = Button(text="Iniciar", size_hint=(None, None), size=(200, 50), pos=(Window.width // 2 - 100, Window.height // 2))
+        self.botao_iniciar.bind(on_press=self.iniciar_jogo)
+        self.add_widget(self.botao_start)
+
+        self.nave = None
         self.balas = []
         self.inimigos = []
         self.placar = 0
 
-        self.criar_inimigos()
-
-        self.bind(on_touch_move=self.mover_nave)
-        self.bind(on_touch_down=self.atirar_bala)
-
         self.velocidade_bala = 10
         self.velocidade_inimigos = 2
+
+        self.placar_label = Label(text=f'Placar: {self.placar}', font_size=20, color=(1, 1, 1, 1))
+        self.placar_label.pos = (10, Window.height - 30)
+
+    def iniciar_jogo(self, instance):
+
+        self.remove_widget(self.botao_start)
+        self.nave = Rectangle(size=(50, 30), pos=(Window.width // 2 - 25, 50))
+        self.criar_inimigos()
+        self.add_widget(self.placar_label)
 
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
     def criar_inimigos(self):
         for i in range(5):
             for j in range(5):
-                pos_x = 100 + (i*60)
-                pos_y = 400 + (j+50)
-                inimigo = Rectangle(size=(50,30), pos=(pos_x, pos_y))
+                pos_x = 100 + (i * 60)
+                pos_y = 400 + (j * 50)
+                inimigo = Rectangle(size=(50, 30), pos=(pos_x, pos_y))
                 self.inimigos.append(inimigo)
 
     def mover_nave(self, instance, touch):
@@ -48,51 +62,44 @@ class Jogo(Widget):
     def update(self, dt):
         for bala in self.balas[:]:
             bala.pos = (bala.pos[0], bala.pos[1] + self.velocidade_bala)
-
             if bala.pos[1] > Window.height:
                 self.balas.remove(bala)
 
         for inimigo in self.inimigos[:]:
             inimigo.pos = (inimigo.pos[0], inimigo.pos[1] - self.velocidade_inimigos)
-
             if inimigo.pos[1] < 50:
                 self.inimigos.remove(inimigo)
 
             for bala in self.balas[:]:
                 if (bala.pos[0] < inimigo.pos[0] + inimigo.size[0] and
-                    bala.pos[0] + bala.size[0] > inimigo.pos[0] and
-                    bala.pos[1] < inimigo.pos[1] + inimigo.size[1] and
-                    bala.pos[1] + bala.size[1] > inimigo.pos[1]):
-
+                        bala.pos[0] + bala.size[0] > inimigo.pos[0] and
+                        bala.pos[1] < inimigo.pos[1] + inimigo.size[1] and
+                        bala.pos[1] + bala.size[1] > inimigo.pos[1]):
                     self.balas.remove(bala)
                     self.inimigos.remove(inimigo)
                     self.placar += 1
+                    self.placar_label.text = f'Placar: {self.placar}'
                     break
 
         self.canvas.clear()
         with self.canvas:
-            Color(0,1,0)
-            self.nave
 
-            Color(1,0,0)
+            if self.nave:
+                Color(0, 1, 0)  # Cor verde
+                self.nave
+
+            Color(1, 0, 0)
             for bala in self.balas:
                 bala
 
-            Color(1,1,0)
+            Color(1, 1, 0)
             for inimigo in self.inimigos:
                 inimigo
-
-            self.desenhar_placar()
-
-    def desenhar_placar(self):
-        placar_label = Label(text=f'Placar: {self.placar}', font_size=20, color=(1,1,1,1))
-        placar_label.pos = (10,Window.height - 30)
-        self.add_widget(placar_label)
 
 class InvasorApp(App):
     def build(self):
         jogo = Jogo()
         return jogo
 
-if __name__== '__main__':
+if __name__ == '__main__':
     InvasorApp().run()
