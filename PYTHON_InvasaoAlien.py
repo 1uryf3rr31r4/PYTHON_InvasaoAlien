@@ -40,7 +40,7 @@ class Jogo(Widget):
             self.nave.pos = (touch.x - self.nave.size[0] / 2, self.nave.pos[1])
 
     def atirar_bala(self, instance, touch):
-        if len(self.balas):
+        if len(self.balas) < 5:
             pos_x = self.nave.pos[0] + self.nave.size[0] / 2
             bala = Rectangle(size=(5, 20), pos=(pos_x, self.nave.pos[1] + self.nave.size[1]))
             self.balas.append(bala)
@@ -66,7 +66,7 @@ class Jogo(Widget):
 
                     self.balas.remove(bala)
                     self.inimigos.remove(inimigo)
-                    self.score += 1
+                    self.placar += 1
                     break
 
         self.canvas.clear()
@@ -94,5 +94,5 @@ class InvasorApp(App):
         jogo = Jogo()
         return jogo
 
-if __name__== "__main__":
+if __name__== '__main__':
     InvasorApp().run()
