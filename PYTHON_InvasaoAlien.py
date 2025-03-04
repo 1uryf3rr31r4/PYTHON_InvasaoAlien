@@ -41,12 +41,14 @@ class Jogo:
         self.movendo_direita = False
         self.fim_jogo = False
 
+        self.ondas = 0
+
     def criar_inimigos(self):
         self.inimigos = []
         for i in range(5):
-            for j in range(5):
-                pos_x = 100 + (i * 60)
-                pos_y = 100 + (j * 50)
+            for j in range(3):
+                pos_x = 100 + (i * 100)
+                pos_y = 50 + (j * 60)
                 inimigo = pygame.Rect(pos_x, pos_y, 50, 30)
                 self.inimigos.append(inimigo)
 
@@ -101,16 +103,14 @@ class Jogo:
 
             if inimigo.x <= 0 or inimigo.x >= largura - inimigo.width:
                 self.direcao_inimigos *= -1
-                self.inimigos_descendo = True
-
-            if self.inimigos_descendo:
-                self.contador_descida += 1
-                if self.contador_descida >= 30:
-                    inimigo.y += 2
-                    self.contador_descida = 0
+                self.descer_inimigos()
 
             if inimigo.y >= altura - 60 or inimigo.colliderect(self.nave):
-                self.fim_jogo = True
+                self.game_over = True
+
+    def descer_inimigos(self):
+        for inimigo in self.inimigos:
+            inimigo.y += 2
 
     def checar_colisoes(self):
         for bala in self.balas[:]:
@@ -126,6 +126,14 @@ class Jogo:
         self.placar = 0
         self.criar_inimigos()
         self.fim_jogo = False
+        self.ondas += 1
+
+        self.velocidade_inimigos *= 1.05
+
+    def reiniciar_onda(self):
+        self.criar_inimigos()
+        self.ondas += 1
+        self.velocidade_inimigos *= 1.05
 
 def main():
     clock = pygame.time.Clock()
@@ -160,11 +168,15 @@ def main():
             jogo.atualizar_balas()
             jogo.atualizar_inimigos()
             jogo.checar_colisoes()
+
+            if not jogo.inimigos:
+                jogo.reiniciar_onda()
+
             jogo.desenhar()
         else:
             if jogo.fim_jogo:
                 font = pygame.font.SysFont("Arial", 50)
-                texto_fim_jogo = font.render("Fim de Jogo", True, vermelho)
+                texto_fim_jogo = font.render("FIM DE JOGO", True, vermelho)
                 tela.blit(texto_fim_jogo, (largura // 2 - 150, altura // 2 - 25))
             else:
                 jogo.desenhar_botao_iniciar()

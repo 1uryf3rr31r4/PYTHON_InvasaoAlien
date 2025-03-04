@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3621c837-02a4-4acb-94d1-b5ed23a1a75d" name="Changes" comment="Correção de Movimentação da Nave">
+    <list default="true" id="3621c837-02a4-4acb-94d1-b5ed23a1a75d" name="Changes" comment="Correção de Movimentação da Nave e Inimigos">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PYTHON_InvasaoAlien.py" beforeDir="false" afterPath="$PROJECT_DIR$/PYTHON_InvasaoAlien.py" afterDir="false" />
     </list>
@@ -168,7 +168,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741045935479</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Correção de Movimentação da Nave e Inimigos">
+      <option name="closed" value="true" />
+      <created>1741117407436</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1741117407436</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -195,6 +203,7 @@
     <MESSAGE value="Mudando do Kivy para o Pygame" />
     <MESSAGE value="Criação da Função Main" />
     <MESSAGE value="Criação da Função Iniciar Jogo" />
-    <option name="LAST_COMMIT_MESSAGE" value="Criação da Função Iniciar Jogo" />
+    <MESSAGE value="Correção de Movimentação da Nave e Inimigos" />
+    <option name="LAST_COMMIT_MESSAGE" value="Correção de Movimentação da Nave e Inimigos" />
   </component>
 </project>
