@@ -18,27 +18,36 @@ branco = (255,255,255)
 
 class Jogo:
     def __init__(self):
-        self.nave = pygame.rect(largura // 2 - 25, altura - 60, 50, 30)
+        self.nave = pygame.Rect(largura // 2 - 25, altura - 60, 50, 30)
         self.balas = []
         self.inimigos = []
         self.placar = 0
 
         self.velocidade_bala = 10
         self.velocidade_inimigos = 2
+        self.direcao_inimigos = 1
+        self.inimigos_descendo = False
+        self.contador_descida = 0
 
-        self.fonte = pygame.font.SysFont(("Arial", 12))
+        self.fonte = pygame.font.SysFont("Arial", 20)
 
         self.criar_inimigos()
 
         self.jogo_iniciado = False
-        self.botao_iniciar = pygame.rect(largura // 2 - 100, altura // 2 -25, 200, 50)
+        self.botao_iniciar = pygame.Rect(largura // 2 - 100, altura // 2 -25, 200, 50)
+
+        self.velocidade_nave = 5
+        self.movendo_esquerda = False
+        self.movendo_direita = False
+        self.fim_jogo = False
 
     def criar_inimigos(self):
+        self.inimigos = []
         for i in range(5):
             for j in range(5):
                 pos_x = 100 + (i * 60)
                 pos_y = 100 + (j * 50)
-                inimigo = pygame.rect(pos_x, pos_y, 50, 30)
+                inimigo = pygame.Rect(pos_x, pos_y, 50, 30)
                 self.inimigos.append(inimigo)
 
     def desenhar_placar(self):
@@ -47,8 +56,8 @@ class Jogo:
 
     def desenhar_botao_iniciar(self):
         pygame.draw.rect(tela, branco, self.botao_iniciar)
-        texto_iniciar = self.font.render("Iniciar", True, preto)
-        tela.blit(texto_iniciar, (largura // 2 - 50, altura // 2 -20))
+        texto_iniciar = self.fonte.render("Iniciar", True, preto)
+        tela.blit(texto_iniciar, (largura // 2 - 25, altura // 2 - 14))
 
     def desenhar(self):
         tela.fill(preto)
@@ -62,13 +71,20 @@ class Jogo:
 
         self.desenhar_placar()
 
-    def mover_nave(self, mov_x):
-        if self.nave.x + mov_x >= 0 and self.nave.x + mov_x <= largura - self.nave.width:
-            self.nave.x += mov_x
+    def mover_nave(self):
+        if self.movendo_esquerda:
+            self.nave.x -= self.velocidade_nave
+        if self.movendo_direita:
+            self.nave.x += self.velocidade_nave
+
+        if self.nave.x < 0:
+            self.nave = 0
+        elif self.nave.x > largura - self.nave.width:
+            self.nave.x = largura - self.nave.width
 
     def atirar_bala(self):
         if len(self.balas) < 5:
-            nova_bala = pygame.rect(self.nave.x + self.nave.width // 2 - 2, self.nave.y, 5, 20)
+            nova_bala = pygame.Rect(self.nave.x + self.nave.width // 2 - 2, self.nave.y, 5, 20)
             self.balas.append(nova_bala)
 
     def atualizar_balas(self):
@@ -78,10 +94,23 @@ class Jogo:
                 self.balas.remove(bala)
 
     def atualizar_inimigos(self):
+        if self.fim_jogo:
+            return
         for inimigo in self.inimigos[:]:
-            inimigo.y += self.velocidade_inimigos
-            if inimigo.y > altura:
-                self.inimigos.remove(inimigo)
+            inimigo.x += self.direcao_inimigos * self.velocidade_inimigos
+
+            if inimigo.x <= 0 or inimigo.x >= largura - inimigo.width:
+                self.direcao_inimigos *= -1
+                self.inimigos_descendo = True
+
+            if self.inimigos_descendo:
+                self.contador_descida += 1
+                if self.contador_descida >= 30:
+                    inimigo.y += 2
+                    self.contador_descida = 0
+
+            if inimigo.y >= altura - 60 or inimigo.colliderect(self.nave):
+                self.fim_jogo = True
 
     def checar_colisoes(self):
         for bala in self.balas[:]:
@@ -94,7 +123,9 @@ class Jogo:
 
     def iniciar_jogo(self):
         self.jogo_iniciado = True
+        self.placar = 0
         self.criar_inimigos()
+        self.fim_jogo = False
 
 def main():
     clock = pygame.time.Clock()
@@ -112,114 +143,34 @@ def main():
 
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_LEFT:
-                    jogo.mover_nave(-10)
+                    jogo.movendo_esquerda = True
                 if evento.key == pygame.K_RIGHT:
-                    jogo.mover_nave(10)
+                    jogo.movendo_direita = True
                 if evento.key == pygame.K_SPACE:
                     jogo.atirar_bala()
 
-        if jogo.jogo_iniciado:
+            if evento.type == pygame.KEYUP:
+                if evento.key == pygame.K_LEFT:
+                    jogo.movendo_esquerda = False
+                if evento.key == pygame.K_RIGHT:
+                    jogo.movendo_direita = False
+
+        if jogo.jogo_iniciado and not jogo.fim_jogo:
+            jogo.mover_nave()
             jogo.atualizar_balas()
             jogo.atualizar_inimigos()
             jogo.checar_colisoes()
             jogo.desenhar()
         else:
-            jogo.desenhar_botao_iniciar()
+            if jogo.fim_jogo:
+                font = pygame.font.SysFont("Arial", 50)
+                texto_fim_jogo = font.render("Fim de Jogo", True, vermelho)
+                tela.blit(texto_fim_jogo, (largura // 2 - 150, altura // 2 - 25))
+            else:
+                jogo.desenhar_botao_iniciar()
 
         pygame.display.update()
         clock.tick(60)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
-
-""" from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.uix.button import Button
-from kivy.uix.label import Label
-from kivy.core.window import Window
-from kivy.graphics import Rectangle, Color
-from kivy.clock import Clock
-
-class Jogo(Widget):
-        super().__init__(**kwargs)
-
-        self.botao_iniciar = Button(text="Iniciar", size_hint=(None, None), size=(200, 50), pos=(Window.width // 2 - 100, Window.height // 2))
-        self.botao_iniciar.bind(on_press=self.iniciar_jogo)
-        self.add_widget(self.botao_start)
-
-        self.nave = None
-        self.balas = []
-        self.inimigos = []
-        self.placar = 0
-
-        self.velocidade_bala = 10
-        self.velocidade_inimigos = 2
-
-        self.placar_label = Label(text=f'Placar: {self.placar}', font_size=20, color=(1, 1, 1, 1))
-        self.placar_label.pos = (10, Window.height - 30)
-
-    def iniciar_jogo(self, instance):
-
-        self.remove_widget(self.botao_start)
-        self.nave = Rectangle(size=(50, 30), pos=(Window.width // 2 - 25, 50))
-        self.criar_inimigos()
-        self.add_widget(self.placar_label)
-
-        Clock.schedule_interval(self.update, 1.0 / 60.0)
-
-
-
-    def mover_nave(self, instance, touch):
-        if touch.x > self.nave.pos[0] and touch.x < self.nave.pos[0] + self.nave.size[0]:
-            self.nave.pos = (touch.x - self.nave.size[0] / 2, self.nave.pos[1])
-
-    def atirar_bala(self, instance, touch):
-        if len(self.balas) < 5:
-            pos_x = self.nave.pos[0] + self.nave.size[0] / 2
-            bala = Rectangle(size=(5, 20), pos=(pos_x, self.nave.pos[1] + self.nave.size[1]))
-
-
-    def update(self, dt):
-        for bala in self.balas[:]:
-            bala.pos = (bala.pos[0], bala.pos[1] + self.velocidade_bala)
-            if bala.pos[1] > Window.height:
-                self.balas.remove(bala)
-
-        for inimigo in self.inimigos[:]:
-            inimigo.pos = (inimigo.pos[0], inimigo.pos[1] - self.velocidade_inimigos)
-            if inimigo.pos[1] < 50:
-                self.inimigos.remove(inimigo)
-
-            for bala in self.balas[:]:
-                if (bala.pos[0] < inimigo.pos[0] + inimigo.size[0] and
-                        bala.pos[0] + bala.size[0] > inimigo.pos[0] and
-                        bala.pos[1] < inimigo.pos[1] + inimigo.size[1] and
-                        bala.pos[1] + bala.size[1] > inimigo.pos[1]):
-                    self.balas.remove(bala)
-                    self.inimigos.remove(inimigo)
-                    self.placar += 1
-                    self.placar_label.text = f'Placar: {self.placar}'
-                    break
-
-        self.canvas.clear()
-        with self.canvas:
-
-            if self.nave:
-                Color(0, 1, 0)  # Cor verde
-                self.nave
-
-            Color(1, 0, 0)
-            for bala in self.balas:
-                bala
-
-            Color(1, 1, 0)
-            for inimigo in self.inimigos:
-                inimigo
-
-class InvasorApp(App):
-    def build(self):
-        jogo = Jogo()
-        return jogo
-
-"""
